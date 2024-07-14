@@ -1,22 +1,14 @@
--- EDA
 
--- Here we are jsut going to explore the data and find trends or patterns or anything interesting like outliers
+-- Exploring the data to find trends or patterns or anything interesting like outliers
 
--- normally when you start the EDA process you have some idea of what you're looking for
-
--- with this info we are just going to look around and see what we find!
 
 SELECT * 
-FROM world_layoffs.layoffs_staging2;
+FROM world_layoffs.layoffs1;
 
--- EASIER QUERIES
+
 
 SELECT MAX(total_laid_off)
 FROM world_layoffs.layoffs_staging2;
-
-
-
-
 
 
 -- Looking at Percentage to see how big these layoffs were
@@ -32,39 +24,22 @@ WHERE  percentage_laid_off = 1;
 
 -- if we order by funcs_raised_millions we can see how big some of these companies were
 SELECT *
-FROM world_layoffs.layoffs_staging2
+FROM world_layoffs.layoffs1
 WHERE  percentage_laid_off = 1
 ORDER BY funds_raised_millions DESC;
--- BritishVolt looks like an EV company, Quibi! I recognize that company - wow raised like 2 billion dollars and went under - ouch
+-- BritishVolt an EV company was the biggest company to go bankrupt
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
--- SOMEWHAT TOUGHER AND MOSTLY USING GROUP BY--------------------------------------------------------------------------------------------------
 
 -- Companies with the biggest single Layoff
 
 SELECT company, total_laid_off
-FROM world_layoffs.layoffs_staging
+FROM world_layoffs.layoffs1
 ORDER BY 2 DESC
 LIMIT 5;
--- now that's just on a single day
 
 -- Companies with the most Total Layoffs
 SELECT company, SUM(total_laid_off)
-FROM world_layoffs.layoffs_staging2
+FROM world_layoffs.layoffs1
 GROUP BY company
 ORDER BY 2 DESC
 LIMIT 10;
@@ -73,20 +48,19 @@ LIMIT 10;
 
 -- by location
 SELECT location, SUM(total_laid_off)
-FROM world_layoffs.layoffs_staging2
+FROM world_layoffs.layoffs1
 GROUP BY location
 ORDER BY 2 DESC
 LIMIT 10;
 
--- this it total in the past 3 years or in the dataset
 
 SELECT country, SUM(total_laid_off)
-FROM world_layoffs.layoffs_staging2
+FROM world_layoffs.layoffs1
 GROUP BY country
 ORDER BY 2 DESC;
 
 SELECT YEAR(date), SUM(total_laid_off)
-FROM world_layoffs.layoffs_staging2
+FROM world_layoffs.layoffs1
 GROUP BY YEAR(date)
 ORDER BY 1 ASC;
 
@@ -104,18 +78,10 @@ ORDER BY 2 DESC;
 
 
 
-
-
-
--- TOUGHER QUERIES------------------------------------------------------------------------------------------------------------------------------------
-
--- Earlier we looked at Companies with the most Layoffs. Now let's look at that per year. It's a little more difficult.
--- I want to look at 
-
 WITH Company_Year AS 
 (
   SELECT company, YEAR(date) AS years, SUM(total_laid_off) AS total_laid_off
-  FROM layoffs_staging2
+  FROM layoffs1
   GROUP BY company, YEAR(date)
 )
 , Company_Year_Rank AS (
@@ -137,7 +103,7 @@ FROM layoffs_staging2
 GROUP BY dates
 ORDER BY dates ASC;
 
--- now use it in a CTE so we can query off of it
+-- now using it in a CTE to query off of it
 WITH DATE_CTE AS 
 (
 SELECT SUBSTRING(date,1,7) as dates, SUM(total_laid_off) AS total_laid_off
